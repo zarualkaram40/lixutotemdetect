@@ -1,0 +1,46 @@
+name: Build TotemGuard
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Check project files
+        run: |
+          ls -la
+          test -f pom.xml || {
+            echo "ERROR: pom.xml not found!"
+            exit 1
+          }
+
+      - name: Build TotemGuard
+        run: mvn -B clean package
+
+      - name: Show generated JAR
+        run: ls -lh target/*.jar
+
+      - name: Upload JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: TotemGuard-Paper-1.21.11
+          path: target/*.jar
+          if-no-files-found: error
